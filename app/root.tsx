@@ -75,3 +75,14 @@ function Layout({ children }: Readonly<{ children: React.ReactNode }>) {
     </div>
   )
 }
+
+export function ErrorBoundary({ error }: Readonly<{ error: Error }>) {
+  return (
+    <div className="p-6 bg-red-100 rounded shadow">
+      <h1 className="text-2xl font-bold text-red-600">Oops! Something went wrong.</h1>
+      <p className="text-red-500 mt-2">{error.message}</p>
+      <Link to="/" className="text-blue-500 underline">Go back to Home</Link>
+    </div>
+  );
+}
+

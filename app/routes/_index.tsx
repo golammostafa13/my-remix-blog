@@ -3,7 +3,6 @@
 export default function Home() {
   return (
     <div>
-      <h1>Welcome to Remix Blog!</h1>
       <main className="flex-grow container mx-auto p-4">
         <h2 className="text-3xl font-bold mb-6">Welcome to My Remix Blog</h2>
         <p className="mb-4">Explore the latest posts and updates on web development, Remix, and more.</p>

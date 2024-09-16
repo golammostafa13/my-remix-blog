@@ -1,0 +1,21 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Post model with UUID and updatedAt field
+model Post {
+  id        String   @id @default(uuid())    // UUID as the primary key
+  title     String
+  content   String
+  author    String
+  createdAt DateTime @default(now())         // Auto set timestamp
+  updatedAt DateTime @updatedAt              // Auto update timestamp on modification
+}

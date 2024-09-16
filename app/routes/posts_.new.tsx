@@ -1,5 +1,6 @@
-import { ActionFunction, json, redirect } from "@remix-run/node";
-import { Form, useActionData } from "@remix-run/react";
+import { ActionFunction } from "@remix-run/node";
+import { Form, Link, isRouteErrorResponse, json, redirect, useActionData, useRouteError } from "@remix-run/react";
+import { db } from "~/utils/db.server";
 
 // Type for form data
 type PostErrors = {
@@ -11,9 +12,7 @@ type PostErrors = {
 // Action function to handle form submission
 export const action: ActionFunction = async ({ request }) => {
     const formData = await request.formData();
-    const title = formData.get("title") as string | null;
-    const content = formData.get("content") as string | null;
-    const author = formData.get("author") as string | null;
+    const { title, content, author } = Object.fromEntries(formData) as { title: string, content: string, author: string };
 
     // Simple validation
     const errors: PostErrors = {};
@@ -26,11 +25,18 @@ export const action: ActionFunction = async ({ request }) => {
         return json({ errors }, { status: 400 });
     }
 
-    // Example: You could save the post to a database here
-    // savePostToDatabase({ title, content, author });
 
+    // throw new Response("Oh no! Something went wrongdfssssssss!", {
+    //     status: 500,
+    // });
+    // throw new Error("Oh no! Something went wrongdsd!");
+
+    // Example: You could save the post to a database here
+    const post = await db.post.create({ data: { title, content, author } });
+
+    // Example: You could send an email to the author here
     // Redirect to the posts list after successful submission
-    return redirect("/posts");
+    return redirect(`/posts/${post.id}`);
 };
 
 // Component to render the form
@@ -97,6 +103,40 @@ export default function NewPost() {
                     Create Post
                 </button>
             </Form>
+        </div>
+    );
+}
+
+export function ErrorBoundary() {
+    const error = useRouteError() as Error;
+
+    if (isRouteErrorResponse(error)) {
+        console.log(error)
+        return (
+            <div className="flex flex-col items-center justify-center py-8  bg-red-50">
+                <h1 className="text-4xl font-bold text-red-600 mb-4">Oops! Something went wrong.</h1>
+                <p className="text-lg text-gray-700 mb-2">Status: {error.status}</p>
+                <p className="text-gray-600">{error.data.message || "An unexpected error occurred."}</p>
+                <Link
+                    to="/"
+                    className="mt-6 inline-block bg-red-600 text-white font-semibold py-2 px-4 rounded hover:bg-red-700 transition duration-200"
+                >
+                    Go back to Home
+                </Link>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex flex-col items-center justify-center py-8 bg-gray-50">
+            <h1 className="text-4xl font-bold text-red-600 mb-4">Oops! Something went wrong.</h1>
+            <p className="text-lg text-gray-700 mb-2">{error.message}</p>
+            <Link
+                to="/"
+                className="mt-6 inline-block bg-red-600 text-white font-semibold py-2 px-4 rounded hover:bg-red-700 transition duration-200"
+            >
+                Go back to Home
+            </Link>
         </div>
     );
 }
