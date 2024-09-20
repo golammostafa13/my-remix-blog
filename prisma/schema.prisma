@@ -1,22 +1,71 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
-// Post model with UUID and updatedAt field
 model Post {
-  id        String   @id @default(uuid()) // UUID as the primary key
-  title     String
-  content   String
-  author    String
-  createdAt DateTime @default(now()) // Auto set timestamp
-  updatedAt DateTime @updatedAt // Auto update timestamp on modification
+  id          String     @id @default(uuid()) // UUID as the primary key
+  title       String     
+  content     String
+  author      String
+  createdAt   DateTime   @default(now()) // Auto set timestamp
+  updatedAt   DateTime   @updatedAt // Auto update timestamp on modification
+  userId      String?
+  categoryId  String?
+  comments    Comment[]
+  postTags    PostTag[]
+  user        User?      @relation(fields: [userId], references: [id])
+  category    Category?  @relation(fields: [categoryId], references: [id])
+  @@index([title, createdAt])
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  Post Post[]
+}
+
+model Tag {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  postTags    PostTag[]
+}
+
+model PostTag {
+  postId String
+  tagId  String
+  post   Post @relation(fields: [postId], references: [id])
+  tag    Tag  @relation(fields: [tagId], references: [id])
+  @@id([postId, tagId])
+}
+
+model Comment {
+  id          String     @id @default(uuid()) // UUID as the primary key
+  content     String
+  authorId    String
+  postId      String
+  createdAt   DateTime   @default(now()) // Auto set timestamp
+  updatedAt   DateTime   @updatedAt // Auto update timestamp
+  author      User       @relation(fields: [authorId], references: [id])
+  post        Post       @relation(fields: [postId], references: [id])
+}
+
+model User {
+  id          String     @id @default(uuid()) // UUID as the primary key
+  name        String
+  email       String     @unique
+  password    String     // Field to store hashed password
+  status      String     // Field to store user status (e.g., 'active', 'inactive')
+  posts       Post[]
+  comments    Comment[]
 }

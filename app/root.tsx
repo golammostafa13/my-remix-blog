@@ -1,14 +1,18 @@
-import type { LinksFunction, MetaFunction } from "@remix-run/node";
-import {
-  Link,
-  Links,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration
-} from "@remix-run/react";
-
+// app/root.tsx
+import type { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import { Link, Links, Meta, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse, useLoaderData, useRouteError } from "@remix-run/react";
+import { getAuthStatus } from "~/utils/auth.server"; // You need to implement this function
+import Layout from "./components/Layout";
 import "./tailwind.css";
+
+// Loader function to check authentication status
+export const loader: LoaderFunction = async ({ request }) => {
+  const authStatus = await getAuthStatus(request);
+
+  // Pass authentication status to the client
+  return json({ authStatus });
+};
 
 export const meta: MetaFunction = () => {
   return [
@@ -23,6 +27,7 @@ export const links: LinksFunction = () => [
   { rel: "preconnect", href: "href='https://fonts.googleapis.com/css?family=Poppins'" },
 ];
 
+// Document component
 function Document({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
@@ -41,48 +46,44 @@ function Document({ children }: Readonly<{ children: React.ReactNode }>) {
   );
 }
 
+// Main App component
 export default function App() {
+  const { authStatus } = useLoaderData<typeof loader>();
+
   return (
     <Document>
-      <Layout>
+      <Layout authStatus={authStatus}>
         <Outlet />
       </Layout>
     </Document>
   );
 }
 
-function Layout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <div className="min-h-screen flex flex-col">
-      <nav className="navbar">
-        <Link to={"/"} className="logo">
-          Remix
-        </Link>
-        <ul className="nav">
-          <li>
-            <Link to={"/posts"}>Posts</Link>
-          </li>
-        </ul>
-      </nav>
-      <div className="container">
-        {children}
-      </div>
-      <footer className="bg-gray-800 text-white p-4 mt-4">
-        <div className="container mx-auto text-center">
-          <p>&copy; 2024 My Remix Blog. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
-  )
-}
+// ErrorBoundary component
+export function ErrorBoundary() {
+  const error = useRouteError() as Error;
 
-export function ErrorBoundary({ error }: Readonly<{ error: Error }>) {
+  if (isRouteErrorResponse(error)) {
+    console.log(error)
+    return (
+      <div className="flex flex-col items-center justify-center py-8  bg-red-50">
+        <h1 className="text-4xl font-bold text-red-600 mb-4">Oops! Something went wrong.</h1>
+        <p className="text-lg text-gray-700 mb-2">Status: {error.status}</p>
+        <p className="text-gray-600">{error.data.message || "An unexpected error occurred."}</p>
+        <Link
+          to="/"
+          className="mt-6 inline-block bg-red-600 text-white font-semibold py-2 px-4 rounded hover:bg-red-700 transition duration-200"
+        >
+          Go back to Home
+        </Link>
+      </div>
+    );
+  }
   return (
     <div className="p-6 bg-red-100 rounded shadow">
       <h1 className="text-2xl font-bold text-red-600">Oops! Something went wrong.</h1>
-      <p className="text-red-500 mt-2">{error.message}</p>
+      <p className="text-red-500 mt-2">{error?.message}</p>
       <Link to="/" className="text-blue-500 underline">Go back to Home</Link>
     </div>
   );
 }
-
