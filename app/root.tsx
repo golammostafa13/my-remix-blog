@@ -1,7 +1,7 @@
 // app/root.tsx
 import type { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Link, Links, Meta, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse, useLoaderData, useRouteError } from "@remix-run/react";
+import { Link, Links, Meta, Scripts, ScrollRestoration, isRouteErrorResponse, useRouteError } from "@remix-run/react";
 import { getAuthStatus } from "~/utils/auth.server"; // You need to implement this function
 import Layout from "./components/Layout";
 import "./tailwind.css";
@@ -48,13 +48,10 @@ function Document({ children }: Readonly<{ children: React.ReactNode }>) {
 
 // Main App component
 export default function App() {
-  const { authStatus } = useLoaderData<typeof loader>();
 
   return (
     <Document>
-      <Layout authStatus={authStatus}>
-        <Outlet />
-      </Layout>
+      <Layout />
     </Document>
   );
 }
@@ -64,10 +61,9 @@ export function ErrorBoundary() {
   const error = useRouteError() as Error;
 
   if (isRouteErrorResponse(error)) {
-    console.log(error)
     return (
       <div className="flex flex-col items-center justify-center py-8  bg-red-50">
-        <h1 className="text-4xl font-bold text-red-600 mb-4">Oops! Something went wrong.</h1>
+        <h1 className="text-4xl font-bold text-red-600 mb-4">Oops! Something wentkhkh wrong.</h1>
         <p className="text-lg text-gray-700 mb-2">Status: {error.status}</p>
         <p className="text-gray-600">{error.data.message || "An unexpected error occurred."}</p>
         <Link

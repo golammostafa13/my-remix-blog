@@ -1,14 +1,14 @@
 import { vitePlugin as remix } from "@remix-run/dev";
-import { flatRoutes } from "remix-flat-routes"; // Import flatRoutes from remix-flat-routes
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [
     remix({
-      routes: async (defineRoutes) => {
-        return flatRoutes('routes', defineRoutes); // Define flat routes
-      },
+      // ignoredRouteFiles: ['**/*'],
+      // routes: async (defineRoutes) => {
+      //   return flatRoutes('routes', defineRoutes); // Define flat routes
+      // },
       future: {
         v3_fetcherPersist: true,
         v3_relativeSplatPath: true,
